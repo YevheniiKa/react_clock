@@ -1,5 +1,12 @@
 import React from 'react';
 import './App.scss';
+import { Clock } from './Clock';
+
+type State = {
+  timerNameId: number;
+  visible: boolean;
+  clockName: string;
+};
 
 function getRandomName(): string {
   const value = Date.now().toString().slice(-4);
@@ -7,31 +14,50 @@ function getRandomName(): string {
   return `Clock-${value}`;
 }
 
-export const App: React.FC = () => {
-  const today = new Date();
-  let clockName = 'Clock-0';
+/* eslint-disable */
+export class App extends React.Component<{}, State> {
+  state: State = {
+    visible: true,
+    timerNameId: 0,
+    clockName: 'Clock-0',
+  };
 
-  // This code starts a timer
-  const timerId = window.setInterval(() => {
-    clockName = getRandomName();
-  }, 3300);
+  handleRightClick = (event: MouseEvent) => {
+    event.preventDefault();
+    this.setState({ visible: false });
+  };
 
-  // this code stops the timer
-  window.clearInterval(timerId);
+  handleLeftClick = () => {
+    this.setState({ visible: true });
+  };
 
-  return (
-    <div className="App">
-      <h1>React clock</h1>
+  componentDidMount() {
+    const timerNameId = window.setInterval(() => {
+      this.setState(prevState => {
+        const newName = getRandomName();
+        console.warn(`Renamed from ${prevState.clockName} to ${newName}`);
+        return { clockName: newName };
+      });
+    }, 3300);
 
-      <div className="Clock">
-        <strong className="Clock__name">{clockName}</strong>
+    document.addEventListener('click', this.handleLeftClick);
+    document.addEventListener('contextmenu', this.handleRightClick);
+  }
 
-        {' time is '}
+  componentWillUnmount() {
+    window.clearInterval(this.state.timerNameId);
+    document.removeEventListener('click', this.handleLeftClick);
+    document.removeEventListener('contextmenu', this.handleRightClick);
+  }
 
-        <span className="Clock__time">
-          {today.toUTCString().slice(-12, -4)}
-        </span>
+  render() {
+    return (
+      <div className="App">
+        <h1>React clock</h1>
+        {this.state.visible && (
+          <Clock key={this.state.clockName} name={this.state.clockName} />
+        )}
       </div>
-    </div>
-  );
-};
+    );
+  }
+}
