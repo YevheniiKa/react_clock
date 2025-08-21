@@ -3,51 +3,61 @@ import './App.scss';
 import { Clock } from './Clock';
 
 type State = {
-  timerNameId: number;
-  visible: boolean;
   clockName: string;
+  hasClock: boolean;
 };
+let clockCounter = 0;
 
-function getRandomName(): string {
-  const value = Date.now().toString().slice(-4);
+function getClockName(): string {
+  const names = ['Clock-0', 'Clock-4900', 'Clock-8200', 'Clock-1500'];
+  const index = clockCounter % names.length;
 
-  return `Clock-${value}`;
+  return names[index];
 }
 
-/* eslint-disable */
+function getRandomName(): string {
+  clockCounter++;
+
+  return getClockName();
+}
+
 export class App extends React.Component<{}, State> {
   state: State = {
-    visible: true,
-    timerNameId: 0,
     clockName: 'Clock-0',
+    hasClock: true,
   };
+
+  private nameIntervalId: number = 0;
 
   handleRightClick = (event: MouseEvent) => {
     event.preventDefault();
-    this.setState({ visible: false });
+    this.setState({ hasClock: false });
   };
 
   handleLeftClick = () => {
-    this.setState({ visible: true });
+    this.setState({ hasClock: true });
   };
 
   componentDidMount() {
-    const timerNameId = window.setInterval(() => {
+    this.nameIntervalId = window.setInterval(() => {
       this.setState(prevState => {
         const newName = getRandomName();
-        console.warn(`Renamed from ${prevState.clockName} to ${newName}`);
+
+        if (prevState.hasClock) {
+          // eslint-disable-next-line no-console
+          console.warn(`Renamed from ${prevState.clockName} to ${newName}`);
+        }
+
         return { clockName: newName };
       });
     }, 3300);
-
-    this.setState({ timerNameId });
 
     document.addEventListener('click', this.handleLeftClick);
     document.addEventListener('contextmenu', this.handleRightClick);
   }
 
   componentWillUnmount() {
-    window.clearInterval(this.state.timerNameId);
+    window.clearInterval(this.nameIntervalId);
     document.removeEventListener('click', this.handleLeftClick);
     document.removeEventListener('contextmenu', this.handleRightClick);
   }
@@ -56,9 +66,7 @@ export class App extends React.Component<{}, State> {
     return (
       <div className="App">
         <h1>React clock</h1>
-        {this.state.visible && (
-          <Clock key={this.state.clockName} name={this.state.clockName} />
-        )}
+        {this.state.hasClock && <Clock name={this.state.clockName} />}
       </div>
     );
   }

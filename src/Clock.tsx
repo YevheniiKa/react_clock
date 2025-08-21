@@ -6,38 +6,36 @@ type Props = {
 
 type State = {
   today: Date;
-  timerTimeId: number;
 };
 
-/* eslint-disable */
 export class Clock extends React.Component<Props, State> {
   state: State = {
     today: new Date(),
-    timerTimeId: 0,
   };
 
-  componentDidMount(): void {
-    const timerTimeId = window.setInterval(() => {
+  private timerId: number = 0;
+
+  componentDidMount() {
+    this.timerId = window.setInterval(() => {
       this.setState({ today: new Date() }, () => {
+        // eslint-disable-next-line no-console
         console.log(this.state.today.toUTCString().slice(-12, -4));
       });
     }, 1000);
-
-    this.setState({ timerTimeId });
   }
 
-  componentWillUnmount(): void {
-    window.clearInterval(this.state.timerTimeId);
+  componentWillUnmount() {
+    clearInterval(this.timerId);
   }
 
   render() {
+    const time = this.state.today.toUTCString().slice(-12, -4);
+
     return (
       <div className="Clock">
         <strong className="Clock__name">{this.props.name}</strong>
         {' time is '}
-        <span className="Clock__time">
-          {this.state.today.toUTCString().slice(-12, -4)}
-        </span>
+        <span className="Clock__time">{time}</span>
       </div>
     );
   }
