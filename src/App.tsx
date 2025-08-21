@@ -40,6 +40,8 @@ export class App extends React.Component<{}, State> {
       });
     }, 3300);
 
+    this.setState({ timerNameId });
+
     document.addEventListener('click', this.handleLeftClick);
     document.addEventListener('contextmenu', this.handleRightClick);
   }
