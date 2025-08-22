@@ -40,16 +40,9 @@ export class App extends React.Component<{}, State> {
 
   componentDidMount() {
     this.nameIntervalId = window.setInterval(() => {
-      this.setState(prevState => {
-        const newName = getRandomName();
+      const newName = getRandomName();
 
-        if (prevState.hasClock) {
-          // eslint-disable-next-line no-console
-          console.warn(`Renamed from ${prevState.clockName} to ${newName}`);
-        }
-
-        return { clockName: newName };
-      });
+      this.setState({ clockName: newName });
     }, 3300);
 
     document.addEventListener('click', this.handleLeftClick);
